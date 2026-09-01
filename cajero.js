@@ -161,4 +161,41 @@ texto = texto + (i + 1) + ". [" + m.fechaHora + "] " + m.tipo + " de $" + m.mont
 }
 alert(texto);
 }
+// se usa swich para que sea ordenado
+//se usa while para que cuandoo se salga del menu vuelva al menu de iniciar sesion
 
+function menuTransacciones() {
+    let op = "";
+    while (op !== "5") {
+        op = prompt("MENU " + nombre + "\n1. Retirar\n2. Consignar\n3. Consultar Saldo\n4. Movimientos\n5. Salir");
+        switch (op) {
+            case "1": retirar();              break;
+            case "2": consignar();            break;
+            case "3": consultarSaldo();       break;
+            case "4": consultarMovimientos(); break;
+            case "5": alert("Sesion cerrada"); break;
+            default:  alert("Opcion no valida");
+        }
+    }
+}
+
+// en este menu se usa lo mismo que en el anterior pero para iniciar sesion y registrar
+// pero usamos if para que nos diga si es correcto o no y nos deje ingresar a la cuenta
+//usamos === para comparar si es igual y !== para comparar si no es igual de manera mas estricta
+function main() {
+    let op = "";
+    while (op !== "3") {
+        op = prompt("BANCO MI PLATA\n1. Iniciar sesion\n2. Registrar\n3. Salir");
+        if (op === "1") {
+            if (iniciarSesion() === "si") { menuTransacciones(); }
+        } else if (op === "2") {
+            registrar();
+        } else if (op === "3") {
+            alert("Aplicacion finalizada");
+        } else {
+            alert("Opcion no valida");
+        }
+    }
+}
+
+main();
