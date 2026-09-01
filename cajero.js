@@ -91,3 +91,74 @@ function iniciarSesion() {
     alert("Cuenta bloqueada por 24 horas, comunicate con tu banco");
     return "no";
 }
+// creamos un objeto con todos los datos del movimiento
+// usamos push para meter ese objeto dentro de la lista (Array) de movimientos
+// volvemos a guardar la lista actualizada en el localStorage
+function agregarMovimiento(concepto, valor) {
+let nuevoMovimiento = {
+fechaHora: new Date().toLocaleString(),
+tipo: concepto,
+monto: valor,
+saldoResultante: saldo
+};
+
+movimientos.push(nuevoMovimiento);
+localStorage.setItem("movimientos", JSON.stringify(movimientos));
+}
+
+// aca vemos que el monto sea mayor a 0 y menor o igual al saldo
+// se hace la resta y se guarda
+//ponemos && para ver que se cumplan las dos condiciones
+//colocamos y agregarmovimiento para que muestre que se hizo
+
+function retirar() {
+let monto = Number(prompt("RETIRAR\nMonto:"));
+if (monto > 0 && monto <= saldo) {
+saldo = saldo - monto;
+localStorage.setItem("saldo", saldo);
+agregarMovimiento("Retiro", monto);
+alert("Retiro exitoso. Nuevo saldo: " + saldo);
+} else if (monto > saldo) {
+alert("Fondos insuficientes. Saldo: " + saldo);
+} else {
+alert("Monto no valido");
+}
+}
+
+// aca decimos que monto es mayor a 0
+// sumamos monto y saldo y lo guardamos en el localstorage
+// agregamos movimiento para que nos diga que se hizo
+// y nos muestre el nuevo saldo con un mensaje
+function consignar() {
+let monto = Number(prompt("CONSIGNAR\nMonto:"));
+if (monto > 0) {
+saldo = saldo + monto;
+localStorage.setItem("saldo", saldo);
+agregarMovimiento("Consignacion", monto);
+alert("Consignacion exitosa. Nuevo saldo: " + saldo);
+} else {
+alert("El monto debe ser positivo");
+}
+}
+
+// aca nos muestra el saldo actual de la cuenta
+function consultarSaldo() {
+alert("Su saldo actual es: " + saldo);
+}
+
+// revisamos la cantidad de elementos en la lista con .length
+// usamos un ciclo for para recorrer cada transaccion guardada en el Array
+// mostramos todo el historial formateado en una sola ventana emergente (alert)
+
+function consultarMovimientos() {
+if (movimientos.length === 0) {
+alert("No hay movimientos registrados");
+} else {
+let texto = "HISTORIAL DE MOVIMIENTOS DE " + nombre + ":\n\n";
+for (let i = 0; i < movimientos.length; i++) {
+let m = movimientos[i];
+texto = texto + (i + 1) + ". [" + m.fechaHora + "] " + m.tipo + " de $" + m.monto + " | Saldo: $" + m.saldoResultante + "\n";
+}
+alert(texto);
+}
+
