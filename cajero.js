@@ -21,6 +21,10 @@ if (localStorage.getItem("nombre") !== null) {
     if (localStorage.getItem("movimientos") !== null) {
         movimientos = JSON.parse(localStorage.getItem("movimientos"));
     }
+
+    console.log("[CARGA] Cuenta encontrada en localStorage ->", { nombre, saldo, bloqueado, movimientos });
+} else {
+    console.log("[CARGA] No hay ninguna cuenta guardada todavia en localStorage");
 }
 
 // utilizamos proomp para que salga el cuadro donde pedimos los datos 
@@ -31,9 +35,12 @@ function registrar() {
     let cla = prompt("Clave:");
     let cla2 = prompt("Repita la clave:");
     let ini = Number(prompt("Saldo inicial:"));
+
+    console.log("[REGISTRO] Datos ingresados ->", { nom, saldoInicial: ini, clavesCoinciden: cla === cla2 });
 // aca validamos que las claves sean iguales
 // y evitamos qe ingresen valores negativos
     if (cla !== cla2) {
+        console.log("[REGISTRO] Rechazado: las claves no coinciden");
         alert("Las claves no coinciden");
     } else if (ini >= 0) {
         //aca guardamos todo en las variables y en el localstorage 
@@ -50,8 +57,10 @@ function registrar() {
         localStorage.setItem("bloqueado", bloqueado);
         localStorage.setItem("movimientos", JSON.stringify(movimientos));
         //json .stringify se usa para convertir el array a texto y poder guardarlo en el localStorage
+        console.log("[REGISTRO] Cuenta creada con exito ->", { nombre, saldo, bloqueado });
         alert("Usuario " + nombre + " registrado con exito");
     } else {
+        console.log("[REGISTRO] Rechazado: saldo inicial no valido ->", ini);
         alert("Saldo no valido");
     }
 }
@@ -60,14 +69,17 @@ function registrar() {
 // si no es se crea una alerta donde dice que el usuario no existe
 function iniciarSesion() {
     let nom = prompt("INICIO DE SESION\nUsuario:");
+    console.log("[LOGIN] Usuario ingresado:", nom);
 
     if (nom !== nombre) {
+        console.log("[LOGIN] Rechazado: el usuario no existe");
         alert("El usuario no existe");
         return "no";
     }
     // aca === se usa para comparar estrictamente si es igual
     // si no lo bloquea y no deja ingresar a la cuenta
     if (bloqueado === "si") {
+        console.log("[LOGIN] Rechazado: la cuenta esta bloqueada");
         alert("Cuenta bloqueada por 24 horas, comunicate con tu banco");
         return "no";
     }
@@ -76,7 +88,9 @@ function iniciarSesion() {
     let intentos = 0;
     while (intentos < 3) {
         let cla = prompt("Clave (Intento " + (intentos + 1) + " de 3):");
+        console.log("[LOGIN] Intento " + (intentos + 1) + " de 3 -> clave correcta:", cla === clave);
         if (cla === clave) {
+            console.log("[LOGIN] Acceso concedido para", nombre);
             alert("Bienvenido " + nombre);
             return "si";
         }
@@ -88,22 +102,25 @@ function iniciarSesion() {
 // le sale un mensaje dicienle que ya no hay nada que hacer
     bloqueado = "si";
     localStorage.setItem("bloqueado", "si");
+    console.log("[LOGIN] Cuenta bloqueada tras 3 intentos fallidos");
     alert("Cuenta bloqueada por 24 horas, comunicate con tu banco");
     return "no";
 }
+
 // creamos un objeto con todos los datos del movimiento
 // usamos push para meter ese objeto dentro de la lista (Array) de movimientos
 // volvemos a guardar la lista actualizada en el localStorage
 function agregarMovimiento(concepto, valor) {
-let nuevoMovimiento = {
-fechaHora: new Date().toLocaleString(),
-tipo: concepto,
-monto: valor,
-saldoResultante: saldo
-};
-
-movimientos.push(nuevoMovimiento);
-localStorage.setItem("movimientos", JSON.stringify(movimientos));
+    let nuevoMovimiento = {
+        fechaHora: new Date().toLocaleString(),
+        tipo: concepto,
+        monto: valor,
+        saldoResultante: saldo
+    };
+    
+    movimientos.push(nuevoMovimiento);
+    localStorage.setItem("movimientos", JSON.stringify(movimientos));
+    console.log("[MOVIMIENTO] Registrado ->", nuevoMovimiento);
 }
 
 // aca vemos que el monto sea mayor a 0 y menor o igual al saldo
@@ -112,17 +129,21 @@ localStorage.setItem("movimientos", JSON.stringify(movimientos));
 //colocamos y agregarmovimiento para que muestre que se hizo
 
 function retirar() {
-let monto = Number(prompt("RETIRAR\nMonto:"));
-if (monto > 0 && monto <= saldo) {
-saldo = saldo - monto;
-localStorage.setItem("saldo", saldo);
-agregarMovimiento("Retiro", monto);
-alert("Retiro exitoso. Nuevo saldo: " + saldo);
-} else if (monto > saldo) {
-alert("Fondos insuficientes. Saldo: " + saldo);
-} else {
-alert("Monto no valido");
-}
+    let monto = Number(prompt("RETIRAR\nMonto:"));
+    console.log("[RETIRO] Monto solicitado:", monto, "| Saldo antes:", saldo);
+    if (monto > 0 && monto <= saldo) {
+        saldo = saldo - monto;
+        localStorage.setItem("saldo", saldo);
+        agregarMovimiento("Retiro", monto);
+        console.log("[RETIRO] Exitoso. Saldo despues:", saldo);
+        alert("Retiro exitoso. Nuevo saldo: " + saldo);
+    } else if (monto > saldo) {
+        console.log("[RETIRO] Rechazado: fondos insuficientes");
+        alert("Fondos insuficientes. Saldo: " + saldo);
+    } else {
+        console.log("[RETIRO] Rechazado: monto no valido");
+        alert("Monto no valido");
+    }
 }
 
 // aca decimos que monto es mayor a 0
@@ -130,37 +151,49 @@ alert("Monto no valido");
 // agregamos movimiento para que nos diga que se hizo
 // y nos muestre el nuevo saldo con un mensaje
 function consignar() {
-let monto = Number(prompt("CONSIGNAR\nMonto:"));
-if (monto > 0) {
-saldo = saldo + monto;
-localStorage.setItem("saldo", saldo);
-agregarMovimiento("Consignacion", monto);
-alert("Consignacion exitosa. Nuevo saldo: " + saldo);
-} else {
-alert("El monto debe ser positivo");
-}
+    let monto = Number(prompt("CONSIGNAR\nMonto:"));
+    console.log("[CONSIGNACION] Monto solicitado:", monto, "| Saldo antes:", saldo);
+    if (monto > 0) {
+        saldo = saldo + monto;
+        localStorage.setItem("saldo", saldo);
+        agregarMovimiento("Consignacion", monto);
+        console.log("[CONSIGNACION] Exitosa. Saldo despues:", saldo);
+        alert("Consignacion exitosa. Nuevo saldo: " + saldo);
+    } else {
+        console.log("[CONSIGNACION] Rechazada: el monto debe ser positivo");
+        alert("El monto debe ser positivo");
+    }
 }
 
 // aca nos muestra el saldo actual de la cuenta
 function consultarSaldo() {
-alert("Su saldo actual es: " + saldo);
+    console.log("[CONSULTA SALDO] Saldo actual:", saldo);
+    alert("Su saldo actual es: " + saldo);
 }
 
-// revisamos la cantidad de elementos en la lista con .length
-// usamos un ciclo for para recorrer cada transaccion guardada en el Array
-// mostramos todo el historial formateado en una sola ventana emergente (alert)
-
+// length se usa para saber que hay en la lista
+// === se usa para comparar si hay movimientos guardados o no
 function consultarMovimientos() {
-if (movimientos.length === 0) {
-alert("No hay movimientos registrados");
-} else {
-let texto = "HISTORIAL DE MOVIMIENTOS DE " + nombre + ":\n\n";
-for (let i = 0; i < movimientos.length; i++) {
-let m = movimientos[i];
-texto = texto + (i + 1) + ". [" + m.fechaHora + "] " + m.tipo + " de $" + m.monto + " | Saldo: $" + m.saldoResultante + "\n";
+    console.log("[CONSULTA MOVIMIENTOS] Cantidad de movimientos:", movimientos.length, "| Detalle:", movimientos);
+    if (movimientos.length === 0) {
+        alert("No hay movimientos registrados");
+    } else {
+    //usamos i para asiganarle un contador 
+    // ponemos length para que nos diga cuantos movimientos hay y nos los muestre
+    //i++ para que vaya sumando uno a uno y nos muestre todos los movimientos
+    //ponemos m para que nos muestre el orden de los movimientos
+    //i + 1 para que nos muestre el numero de movimiento 
+
+
+        let texto = "HISTORIAL DE MOVIMIENTOS DE " + nombre + ":\n\n";
+        for (let i = 0; i < movimientos.length; i++) {
+            let m = movimientos[i];
+            texto = texto + (i + 1) + ". [" + m.fechaHora + "] " + m.tipo + " de $" + m.monto + " | Saldo: $" + m.saldoResultante + "\n";
+        }
+        alert(texto);
+    }
 }
-alert(texto);
-}
+
 // se usa swich para que sea ordenado
 //se usa while para que cuandoo se salga del menu vuelva al menu de iniciar sesion
 
@@ -168,6 +201,7 @@ function menuTransacciones() {
     let op = "";
     while (op !== "5") {
         op = prompt("MENU " + nombre + "\n1. Retirar\n2. Consignar\n3. Consultar Saldo\n4. Movimientos\n5. Salir");
+        console.log("[MENU TRANSACCIONES] Opcion seleccionada:", op);
         switch (op) {
             case "1": retirar();              break;
             case "2": consignar();            break;
@@ -186,6 +220,7 @@ function main() {
     let op = "";
     while (op !== "3") {
         op = prompt("BANCO MI PLATA\n1. Iniciar sesion\n2. Registrar\n3. Salir");
+        console.log("[MENU PRINCIPAL] Opcion seleccionada:", op);
         if (op === "1") {
             if (iniciarSesion() === "si") { menuTransacciones(); }
         } else if (op === "2") {
